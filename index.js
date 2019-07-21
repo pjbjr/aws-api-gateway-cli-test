@@ -72,11 +72,21 @@ var argv = require("yargs")
   .option("access-token-header", {
     describe: "Header to use to pass access token with request"
   })
+  .option("silent", {
+    describe: "Header to use to pass access token with request",
+    default: false
+  })
   .help("h")
   .alias("h", "help")
   .alias("v", "version")
   .version(packageJson.version)
   .wrap(null).argv;
+
+console.silentLog = function(...params) {
+  if (!argv.silent) {
+    console.log(params);
+  }
+}
 
 function authenticate(callback) {
   var poolData = {
@@ -101,7 +111,7 @@ function authenticate(callback) {
 
   var cognitoUser = new AWSCognito.CognitoUser(userData);
 
-  console.log("Authenticating with User Pool");
+  console.silentLog("Authenticating with User Pool");
 
   cognitoUser.authenticateUser(authenticationDetails, {
     onSuccess: function(result) {
@@ -126,7 +136,7 @@ function authenticate(callback) {
 }
 
 function getCredentials(userTokens, callback) {
-  console.log("Getting temporary credentials");
+  console.silentLog("Getting temporary credentials");
 
   var logins = {};
   var idToken = userTokens.idToken;
@@ -152,7 +162,7 @@ function getCredentials(userTokens, callback) {
 }
 
 function makeRequest(userTokens) {
-  console.log("Making API request");
+  console.silentLog("Making API request");
 
   var apigClient = apigClientFactory.newClient({
     apiKey: argv.apiKey,
