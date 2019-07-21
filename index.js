@@ -73,7 +73,11 @@ var argv = require("yargs")
     describe: "Header to use to pass access token with request"
   })
   .option("silent", {
-    describe: "Header to use to pass access token with request",
+    describe: "Don't output certain log messages on successful execution",
+    default: false
+  })
+  .option("stringify", {
+    describe: "Stringify response objects",
     default: false
   })
   .help("h")
@@ -84,7 +88,7 @@ var argv = require("yargs")
 
 console.silentLog = function(...params) {
   if (!argv.silent) {
-    console.log(params);
+    console.log(...params);
   }
 }
 
@@ -186,19 +190,35 @@ function makeRequest(userTokens) {
   apigClient
     .invokeApi(params, argv.pathTemplate, argv.method, additionalParams, body)
     .then(function(result) {
-      console.dir({
-        status: result.status,
-        statusText: result.statusText,
-        data: result.data
-      });
+      if (!argv.stringify) {
+        console.dir({
+          status: result.status,
+          statusText: result.statusText,
+          data: result.data
+        }, { depth: null });
+      } else {
+        console.log(JSON.stringify({
+          status: result.status,
+          statusText: result.statusText,
+          data: result.data
+        }));
+      }
     })
     .catch(function(result) {
       if (result.response) {
-        console.dir({
-          status: result.response.status,
-          statusText: result.response.statusText,
-          data: result.response.data
-        });
+        if (!argv.stringify) {
+          console.dir({
+            status: result.response.status,
+            statusText: result.response.statusText,
+            data: result.response.data
+          }, { depth: null });
+        } else {
+          console.log(JSON.stringify({
+            status: result.response.status,
+            statusText: result.response.statusText,
+            data: result.response.data
+          }));
+        }
       } else {
         console.log(result.message);
       }
